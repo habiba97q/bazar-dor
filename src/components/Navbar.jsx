@@ -175,7 +175,7 @@ export default function Navbar({ categories = DEFAULT_CATEGORIES }) {
       {/* Category Navigation Bar */}
       <div className="w-full bg-white border-t border-zinc-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center justify-start sm:justify-center gap-3 py-2 overflow-x-auto no-scrollbar scroll-smooth">
+          <nav className="flex items-center justify-start gap-3 py-2 overflow-x-auto no-scrollbar scroll-smooth">
             {activeCategoryList.map((cat) => {
               const isActive = pathname === `/category/${cat.slug}`;
               return (
