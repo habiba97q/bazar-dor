@@ -1,69 +1,84 @@
-import Image from "next/image";
+import React from "react";
+import Hero from "@/components/Hero";
+import ProductCard from "@/components/ProductCard";
+import { getProducts } from "@/lib/api";
+import { toBengaliNumber } from "@/lib/utils";
 
-export default function Home() {
+export default async function HomePage() {
+  const products = await getProducts();
+
+  // Top 6 risers (dir === "up", sorted by change percentage descending)
+  const risers = [...products]
+    .filter((p) => p.change?.dir === "up")
+    .sort((a, b) => (b.change?.pct || 0) - (a.change?.pct || 0))
+    .slice(0, 6);
+
+  // Top 6 fallers (dir === "down", sorted by change percentage descending)
+  const fallers = [...products]
+    .filter((p) => p.change?.dir === "down")
+    .sort((a, b) => (b.change?.pct || 0) - (a.change?.pct || 0))
+    .slice(0, 6);
+
+  const totalBengaliCount = toBengaliNumber(products.length);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="w-full pb-16 sm:pb-24">
+      {/* Hero Banner with CTA smooth scroll to #সব-পণ্য */}
+      <Hero />
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-14 mt-4">
+        {/* Section A — আজ দাম বেড়েছে ▲ */}
+        {risers.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-[#ef4444] text-xs">▲</span>
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
+                আজ দাম বেড়েছে
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              {risers.map((product) => (
+                <ProductCard key={`riser-${product.id}`} product={product} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Section B — আজ দাম কমেছে ▼ */}
+        {fallers.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-[#16a34a] text-xs">▼</span>
+              <h2 className="text-base sm:text-lg font-bold text-zinc-900">
+                আজ দাম কমেছে
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              {fallers.map((product) => (
+                <ProductCard key={`faller-${product.id}`} product={product} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Section C — সব পণ্য */}
+        <section id="সব-পণ্য" className="scroll-mt-28">
+          <div className="mb-5">
+            <h2 className="text-lg sm:text-xl font-bold text-zinc-900">
+              সব পণ্য
+            </h2>
+            <p className="text-xs text-zinc-400 mt-1">
+              মোট {totalBengaliCount}টি পণ্যের আজকের দাম
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {products.map((product) => (
+              <ProductCard key={`all-${product.id}`} product={product} />
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
